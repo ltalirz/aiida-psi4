@@ -5,10 +5,11 @@
 Usage: ./example_01.py
 """
 from os import path
+from pprint import pprint
 import click
+import pytest
 from aiida import cmdline, engine
 from aiida.plugins import DataFactory, CalculationFactory
-from aiida_psi4 import helpers
 
 INPUT_DIR = path.join(path.dirname(path.realpath(__file__)), 'input_files')
 
@@ -18,25 +19,36 @@ def test_run(psi4_code):
 
     Uses test helpers to create AiiDA Code on the fly.
     """
-    if not psi4_code:
-        # get code
-        computer = helpers.get_computer()
-        psi4_code = helpers.get_code(entry_point='psi4', computer=computer)
-
     # Prepare input parameters
-    AtomicInput = DataFactory('psi4')
-    parameters = AtomicInput({'ignore-case': True})
-
-    SinglefileData = DataFactory('singlefile')
-    file1 = SinglefileData(file=path.join(INPUT_DIR, 'file1.txt'))
-    file2 = SinglefileData(file=path.join(INPUT_DIR, 'file2.txt'))
+    TEST_DICT = {
+        'schema_name': 'qcschema_input',
+        'schema_version': 1,
+        'molecule': {
+            'geometry': [
+                0.0, 0.0, -0.1294769411935893, 0.0, -1.494187339479985,
+                1.0274465079245698, 0.0, 1.494187339479985, 1.0274465079245698
+            ],
+            'symbols': ['O', 'H', 'H']
+        },
+        'driver': 'energy',
+        'model': {
+            'method': 'CCSD(T)',
+            'basis': '6-31g'
+        },
+        'keywords': {
+            'scf_type': 'df',
+            'mp2_type': 'df',
+            'cc_type': 'df',
+            'scf_properties': ['mayer_indices']
+        }
+    }
+    AtomicInput = DataFactory('psi4.atomic_input')
+    atomic_input = AtomicInput(TEST_DICT)
 
     # set up calculation
     inputs = {
         'code': psi4_code,
-        'parameters': parameters,
-        'file1': file1,
-        'file2': file2,
+        'qcschema': atomic_input,
         'metadata': {
             'description': 'Test job submission with the aiida_psi4 plugin',
         },
@@ -46,9 +58,10 @@ def test_run(psi4_code):
     # from aiida.engine import submit
     # future = submit(CalculationFactory('psi4'), **inputs)
     result = engine.run(CalculationFactory('psi4'), **inputs)
-
-    computed_diff = result['psi4'].get_content()
-    print('Computed diff between files: \n{}'.format(computed_diff))
+    qcdict = result['qcschema'].get_dict()
+    pprint(qcdict)
+    assert qcdict['success']
+    assert qcdict['return_energy'] == pytest.approx(-76.120695408714, 0.0001)
 
 
 @click.command()

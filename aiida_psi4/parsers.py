@@ -4,18 +4,19 @@ Parsers provided by aiida_psi4.
 
 Register parsers via the "aiida.parsers" entry point in setup.json.
 """
+import json
 from aiida.engine import ExitCode
 from aiida.parsers.parser import Parser
 from aiida.plugins import CalculationFactory
 from aiida.common import exceptions
-from aiida.orm import SinglefileData
+from aiida import orm
 
 Psi4Calculation = CalculationFactory('psi4')
 
 
-class DiffParser(Parser):
+class QCSchemaParser(Parser):
     """
-    Parser class for parsing output of calculation.
+    Parse output of Psi4 calculation in QCSchema format.
     """
     def __init__(self, node):
         """
@@ -50,7 +51,12 @@ class DiffParser(Parser):
         # add output file
         self.logger.info("Parsing '{}'".format(output_filename))
         with self.retrieved.open(output_filename, 'rb') as handle:
-            output_node = SinglefileData(file=handle)
-        self.out('psi4', output_node)
+            output_dict = json.loads(handle.read())
+            if not output_dict['success']:
+                return self.exit_codes.ERROR_CALCULATION_FAILED
+
+            output_node = orm.Dict(dict=output_dict)
+
+        self.out('qcschema', output_node)
 
         return ExitCode(0)

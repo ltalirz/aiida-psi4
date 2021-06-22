@@ -21,7 +21,7 @@
             "psi4 = aiida_psi4.calculations:Psi4Calculation"
         ],
         "aiida.parsers": [
-            "psi4 = aiida_psi4.parsers:DiffParser"
+            "psi4 = aiida_psi4.parsers:QCSchemaParser"
         ],
         "aiida.cmdline.data": [
             "psi4 = aiida_psi4.cli:data_cli"
