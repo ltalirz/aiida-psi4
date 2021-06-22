@@ -1,0 +1,60 @@
+{
+    "name": "aiida-psi4",
+    "author": "Leopold Talirz",
+    "author_email": "leopold.talirz@gmail.com",
+    "description": "AiiDA plugin for the Psi4 Quantum Chemistry package.",
+    "url": "https://github.com/aiidateam/aiida-psi4",
+    "license": "MIT",
+    "classifiers": [
+        "Programming Language :: Python",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Natural Language :: English",
+        "Framework :: AiiDA"
+    ],
+    "version": "0.1.0a0",
+    "entry_points": {
+        "aiida.data": [
+            "psi4.atomic_input = aiida_psi4.data:AtomicInput"
+        ],
+        "aiida.calculations": [
+            "psi4 = aiida_psi4.calculations:Psi4Calculation"
+        ],
+        "aiida.parsers": [
+            "psi4 = aiida_psi4.parsers:DiffParser"
+        ],
+        "aiida.cmdline.data": [
+            "psi4 = aiida_psi4.cli:data_cli"
+        ]
+    },
+    "include_package_data": true,
+    "setup_requires": ["reentry"],
+    "reentry_register": true,
+    "install_requires": [
+        "aiida-core>=1.6.0,<2.0.0",
+        "sqlalchemy<1.4",
+        "six",
+        "qcelemental~=0.20.0",
+        "voluptuous"
+    ],
+    "extras_require": {
+        "testing": [
+            "pgtest~=1.3.1",
+            "wheel~=0.31",
+            "coverage",
+            "pytest~=3.6,<5.0.0",
+            "pytest-cov"
+        ],
+        "pre-commit": [
+            "astroid<2.5",
+            "pre-commit~=2.2",
+            "pylint~=2.5.0"
+        ],
+        "docs": [
+            "sphinx",
+            "sphinxcontrib-contentui",
+            "sphinxcontrib-details-directive; python_version>='3.0'",
+            "sphinx-rtd-theme"
+        ]
+    }
+}
