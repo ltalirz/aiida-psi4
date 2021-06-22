@@ -22,9 +22,6 @@
         ],
         "aiida.parsers": [
             "psi4 = aiida_psi4.parsers:QCSchemaParser"
-        ],
-        "aiida.cmdline.data": [
-            "psi4 = aiida_psi4.cli:data_cli"
         ]
     },
     "include_package_data": true,
@@ -35,6 +32,7 @@
         "sqlalchemy<1.4",
         "six",
         "qcelemental~=0.20.0",
+        "psycopg2-binary<2.9",
         "voluptuous"
     ],
     "extras_require": {
@@ -42,13 +40,14 @@
             "pgtest~=1.3.1",
             "wheel~=0.31",
             "coverage",
-            "pytest~=3.6,<5.0.0",
+            "pytest~=6.0",
+            "aiida-testing @  git+https://github.com/ltalirz/aiida-testing@6b3c2ae023157e73563630aaf24d8337c348b74b#egg=aiida-testing",
             "pytest-cov"
         ],
         "pre-commit": [
             "astroid<2.5",
             "pre-commit~=2.2",
-            "pylint~=2.5.0"
+            "pylint~=2.8.0"
         ],
         "docs": [
             "sphinx",

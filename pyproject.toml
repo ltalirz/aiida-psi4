@@ -8,10 +8,17 @@ disable = [
 ]
 
 [tool.pytest.ini_options]
-python_files = "test_*.py example_*.py"
 filterwarnings = [
     "ignore::DeprecationWarning:aiida:",
     "ignore::DeprecationWarning:plumpy:",
     "ignore::DeprecationWarning:django:",
     "ignore::DeprecationWarning:yaml:",
 ]
+
+addopts = "--durations=0 --cov=aiida_psi4"
+testpaths = [
+    "tests",
+    "examples",
+]
+# test also examples
+python_files = "test_*.py example_*.py"

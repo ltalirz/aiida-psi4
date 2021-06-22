@@ -1,0 +1,62 @@
+{
+  "id": null,
+  "model": {
+    "basis": "6-31g",
+    "method": "CCSD(T)"
+  },
+  "driver": "energy",
+  "extras": {},
+  "keywords": {
+    "cc_type": "df",
+    "mp2_type": "df",
+    "scf_type": "df",
+    "scf_properties": [
+      "mayer_indices"
+    ]
+  },
+  "molecule": {
+    "name": "H2O",
+    "fix_com": false,
+    "symbols": [
+      "O",
+      "H",
+      "H"
+    ],
+    "geometry": [
+      [
+        0.0,
+        0.0,
+        -0.12947694
+      ],
+      [
+        0.0,
+        -1.49418734,
+        1.02744651
+      ],
+      [
+        0.0,
+        1.49418734,
+        1.02744651
+      ]
+    ],
+    "validated": true,
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.molparse.from_schema",
+      "version": "v0.20.0"
+    },
+    "schema_name": "qcschema_molecule",
+    "schema_version": 2,
+    "fix_orientation": false,
+    "molecular_charge": 0.0,
+    "molecular_multiplicity": 1
+  },
+  "protocols": {},
+  "provenance": {
+    "creator": "QCElemental",
+    "routine": "qcelemental.models.results",
+    "version": "v0.20.0"
+  },
+  "schema_name": "qcschema_input",
+  "schema_version": 1
+}

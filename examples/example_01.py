@@ -61,7 +61,8 @@ def test_run(psi4_code):
     qcdict = result['qcschema'].get_dict()
     pprint(qcdict)
     assert qcdict['success']
-    assert qcdict['return_energy'] == pytest.approx(-76.120695408714, 0.0001)
+    assert qcdict['properties']['return_energy'] == pytest.approx(
+        -76.120695408714, 0.0001)
 
 
 @click.command()
