@@ -11,14 +11,16 @@ Note: This plugin uses the QCSchema input format of Psi4 and therefore requires 
 
 ## Features
 
- * Describe input using `AtomicInput` dictionaries (and obtain pre-parsed QCSchema output)
+ * Describe input using `AtomicInput` dictionaries and obtain pre-parsed QCSchema output
+   (see [`examples/example_01.py`](examples/example_01.py))
    ```python
    AtomicInput = DataFactory('psi4.atomic_input')
    inputs['qcschema'] = AtomicInput({...})
    ...
    qcdict = result['qcschema'].get_dict()
    ```
-* Provide raw python as string (and obtain log file as output)
+* Provide raw python as string and obtain log file as output
+  (see [`examples/example_02.py`](examples/example_02.py))
    ```python
    psiapi_str = """import psi4; psi4.geometry('''...'''); psi4.energy*"ccsd(t)/cc-pvtz")"""
    inputs['psiapi'] = Str(psiapi_str)

@@ -69,7 +69,11 @@ class QCSchemaParser(Parser):
 
                 # remove stdout (don't want to store unparsed files in the database)
                 log_node = SinglefileData(
-                    file=io.StringIO(''.join(output_dict['stdout'])),
+                    # note: in python3.9 with AiiDA 2.0 this can be simplified to
+                    # file=io.StrinIO(''.join(output_dict['stdout'])),
+                    file=io.BytesIO(
+                        bytes(''.join(output_dict['stdout']),
+                              encoding='utf8')),
                     filename=PSI4_FILENAMES['qcschema']['output'])
                 output_dict.pop('stdout')
 

@@ -28,11 +28,10 @@
     "setup_requires": ["reentry"],
     "reentry_register": true,
     "install_requires": [
-        "aiida-core>=1.6.0,<2.0.0",
+        "aiida-core>=1.6.4,<2.0.0",
         "sqlalchemy<1.4",
         "six",
         "qcelemental~=0.20.0",
-        "psycopg2-binary<2.9",
         "voluptuous"
     ],
     "extras_require": {
