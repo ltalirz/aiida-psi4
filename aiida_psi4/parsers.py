@@ -5,11 +5,13 @@ Parsers provided by aiida_psi4.
 Register parsers via the "aiida.parsers" entry point in setup.json.
 """
 import json
+import io
 from aiida.engine import ExitCode
 from aiida.parsers.parser import Parser
 from aiida.plugins import CalculationFactory
 from aiida.common import exceptions
 from aiida import orm
+from aiida_psi4.calculations import PSI4_FILENAMES, SinglefileData
 
 Psi4Calculation = CalculationFactory('psi4')
 
@@ -37,7 +39,11 @@ class QCSchemaParser(Parser):
 
         :returns: an exit code, if parsing fails (or nothing if parsing succeeds)
         """
-        output_filename = self.node.get_option('output_filename')
+        if 'qcschema' in self.node.inputs:
+            input_method = 'qcschema'
+        if 'psiapi' in self.node.inputs:
+            input_method = 'psiapi'
+        output_filename = PSI4_FILENAMES[input_method]['output']
 
         # Check that folder content is as expected
         files_retrieved = self.retrieved.list_object_names()
@@ -48,15 +54,27 @@ class QCSchemaParser(Parser):
                 files_retrieved, files_expected))
             return self.exit_codes.ERROR_MISSING_OUTPUT_FILES
 
-        # add output file
+        # add outputs
         self.logger.info("Parsing '{}'".format(output_filename))
         with self.retrieved.open(output_filename, 'rb') as handle:
-            output_dict = json.loads(handle.read())
-            if not output_dict['success']:
-                return self.exit_codes.ERROR_CALCULATION_FAILED
 
-            output_node = orm.Dict(dict=output_dict)
+            if input_method == 'psiapi':
+                log_node = SinglefileData(file=handle,
+                                          filename=output_filename)
 
-        self.out('qcschema', output_node)
+            elif input_method == 'qcschema':
+                output_dict = json.loads(handle.read())
+                if not output_dict['success']:
+                    return self.exit_codes.ERROR_CALCULATION_FAILED
+
+                # remove stdout (don't want to store unparsed files in the database)
+                log_node = SinglefileData(
+                    file=io.StringIO(''.join(output_dict['stdout'])),
+                    filename=PSI4_FILENAMES['qcschema']['output'])
+                output_dict.pop('stdout')
+
+                self.out('qcschema', orm.Dict(dict=output_dict))
+
+            self.out('stdout', log_node)
 
         return ExitCode(0)

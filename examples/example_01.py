@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Run a test calculation on localhost.
+"""Run a test calculation using QCSchema input.
 
-Usage: ./example_01.py
+Usage: ./example_01.py --code psi4
 """
 from os import path
 from pprint import pprint
@@ -15,9 +15,7 @@ INPUT_DIR = path.join(path.dirname(path.realpath(__file__)), 'input_files')
 
 
 def test_run(psi4_code):
-    """Run a calculation on the localhost computer.
-
-    Uses test helpers to create AiiDA Code on the fly.
+    """Run a calculation using QCSchema input.
     """
     # Prepare input parameters
     TEST_DICT = {
@@ -58,6 +56,7 @@ def test_run(psi4_code):
     # from aiida.engine import submit
     # future = submit(CalculationFactory('psi4'), **inputs)
     result = engine.run(CalculationFactory('psi4'), **inputs)
+
     qcdict = result['qcschema'].get_dict()
     pprint(qcdict)
     assert qcdict['success']
@@ -71,9 +70,7 @@ def test_run(psi4_code):
 def cli(code):
     """Run example.
 
-    Example usage: $ ./example_01.py --code diff@localhost
-
-    Alternative (creates diff@localhost-test code): $ ./example_01.py
+    Example usage: $ ./example_01.py --code psi4@localhost
 
     Help: $ ./example_01.py --help
     """

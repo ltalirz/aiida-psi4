@@ -12,6 +12,18 @@ from aiida.plugins import DataFactory
 from aiida import orm
 
 AtomicInput = DataFactory('psi4.atomic_input')
+SinglefileData = DataFactory('singlefile')
+
+PSI4_FILENAMES = {
+    'qcschema': {
+        'input': 'input.json',
+        'output': 'output.json',
+    },
+    'psiapi': {
+        'input': 'input.py',
+        'output': 'output.log',
+    }
+}
 
 
 class Psi4Calculation(CalcJob):
@@ -19,14 +31,11 @@ class Psi4Calculation(CalcJob):
     AiiDA calculation plugin wrapping the psi4 executable.
 
     """
-    _DEFAULT_INPUT_FILENAME = 'in.json'
-    _DEFAULT_OUTPUT_FILENAME = 'out.json'
-
     @classmethod
     def define(cls, spec):
         """Define inputs and outputs of the calculation."""
         # yapf: disable
-        super(Psi4Calculation, cls).define(spec)
+        super().define(spec)
 
         # set default values for AiiDA options
         spec.inputs['metadata']['options']['resources'].default = {
@@ -36,9 +45,12 @@ class Psi4Calculation(CalcJob):
         spec.inputs['metadata']['options']['parser_name'].default = 'psi4'
 
         # new ports
-        spec.input('metadata.options.output_filename', valid_type=str, default=cls._DEFAULT_OUTPUT_FILENAME)
-        spec.input('qcschema', valid_type=(orm.Dict, AtomicInput), help='Psi4 input in QCSchema JSON format')
+        #spec.input('metadata.options.output_filename', valid_type=str, default=cls._DEFAULT_OUTPUT_FILENAME)
+        spec.input('qcschema', valid_type=(orm.Dict, AtomicInput), required=False, help='Psi4 input in QCSchema JSON format')
+        spec.input('psiapi', valid_type=(orm.Str,  SinglefileData),
+            required=False, help='Psi4 input in PsiAPI python format')
         spec.output('qcschema', valid_type=orm.Dict, help='Psi4 output in QCSchema JSON format')
+        spec.output('stdout', valid_type=SinglefileData, help='Psi4 logfile')
 
         spec.exit_code(100, 'ERROR_MISSING_OUTPUT_FILES', message='Calculation did not produce all expected output files.')
         spec.exit_code(101, 'ERROR_CALCULATION_FAILED', message='Psi4 reported calculation as unsuccessful.')
@@ -54,21 +66,40 @@ class Psi4Calculation(CalcJob):
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
         codeinfo = datastructures.CodeInfo()
-        codeinfo.cmdline_params = [ '--qcschema', self._DEFAULT_INPUT_FILENAME, '--output', self._DEFAULT_OUTPUT_FILENAME ]
         codeinfo.code_uuid = self.inputs.code.uuid
         codeinfo.withmpi = self.inputs.metadata.options.withmpi
 
-        # Add QCSchema input file
-        with io.open(folder.get_abs_path(self._DEFAULT_INPUT_FILENAME), mode='w', encoding='utf-8') as fobj:
+
+        # Add input file
+        if 'qcschema' in self.inputs and 'psiapi' in self.inputs:
+            raise InputValidationError('Do not mix "qcschema" and "psithon" input')
+
+        if 'qcschema' in self.inputs:
+            filenames = PSI4_FILENAMES['qcschema']
+            codeinfo.cmdline_params = [ '--qcschema', filenames['input'], '--output', filenames['output']]
+            input_string = json.dumps(self.inputs.qcschema.get_dict(), indent=2)
+        elif 'psiapi' in self.inputs:
+            filenames = PSI4_FILENAMES['psiapi']
+            codeinfo.cmdline_params = [ filenames['input'], '--output', filenames['output']]
+            if isinstance(self.inputs.psiapi, SinglefileData):
+                with self.inputs.psiapi.open('r') as handle:
+                    input_string = handle.read()
+            elif isinstance(self.inputs.psiapi, orm.Str):
+                input_string = self.inputs.psiapi.value
+        else:
+            raise InputValidationError('Please provide either "qcschema" or "psithon" input')
+
+        # write input file
+        with io.open(folder.get_abs_path(filenames['input']), mode='w', encoding='utf-8') as fobj:
             try:
-                fobj.write(json.dumps(self.inputs.qcschema.get_dict(), indent=2))
+                fobj.write(input_string)
             except ValueError as exc:
-                raise InputValidationError('Unable to write input file to disk') from exc
+                raise InputValidationError(f'Unable to write input file {filenames["input"]} to disk') from exc
 
         # Prepare a `CalcInfo` to be returned to the engine
         calcinfo = datastructures.CalcInfo()
         calcinfo.codes_info = [codeinfo]
         calcinfo.local_copy_list = [ ]
-        calcinfo.retrieve_list = [self.metadata.options.output_filename]
+        calcinfo.retrieve_list = [filenames['output']]
 
         return calcinfo

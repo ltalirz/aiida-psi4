@@ -5,11 +5,20 @@ repos:
   rev: v3.4.0
   hooks:
     - id: double-quote-string-fixer
+      exclude: &exclude_files >
+        (?x)^(
+            tests/data/.*
+        )$
     - id: end-of-file-fixer
+      exclude: *exclude_files
     - id: fix-encoding-pragma
+      exclude: *exclude_files
     - id: mixed-line-ending
+      exclude: *exclude_files
     - id: trailing-whitespace
+      exclude: *exclude_files
     - id: check-json
+      exclude: *exclude_files
 
 # yapf = yet another python formatter
 - repo: https://github.com/pre-commit/mirrors-yapf
@@ -18,6 +27,7 @@ repos:
   - id: yapf
     name: yapf
     args: ["-i"]
+    exclude: *exclude_files
 
 - repo: local
   hooks:
@@ -26,8 +36,9 @@ repos:
     types: [file, python]
     name: pylint
     description: "This hook runs the pylint static code analyzer"
-    exclude: &exclude_files >
+    exclude: >
       (?x)^(
+          tests/data.*|
           docs/.*|
       )$
     entry: pylint

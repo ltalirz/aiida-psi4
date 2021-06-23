@@ -9,14 +9,21 @@ AiiDA plugin for the Psi4 Quantum Chemistry package.
 
 Note: This plugin uses the QCSchema input format of Psi4 and therefore requires Psi4 version 1.4 or above.
 
-
 ## Features
 
- * Describe input using `AtomicInput` dictionaries:
+ * Describe input using `AtomicInput` dictionaries (and obtain pre-parsed QCSchema output)
    ```python
-   SinglefileData = DataFactory('singlefile')
-   inputs['file1'] = SinglefileData(file='/path/to/file1')
-   inputs['file2'] = SinglefileData(file='/path/to/file2')
+   AtomicInput = DataFactory('psi4.atomic_input')
+   inputs['qcschema'] = AtomicInput({...})
+   ...
+   qcdict = result['qcschema'].get_dict()
+   ```
+* Provide raw python as string (and obtain log file as output)
+   ```python
+   psiapi_str = """import psi4; psi4.geometry('''...'''); psi4.energy*"ccsd(t)/cc-pvtz")"""
+   inputs['psiapi'] = Str(psiapi_str)
+   ...
+   log = result['stdout'].get_content()
    ```
 
 ## Installation
