@@ -30,9 +30,7 @@
     "install_requires": [
         "aiida-core>=1.6.4,<2.0.0",
         "sqlalchemy<1.4",
-        "six",
-        "qcelemental~=0.20.0",
-        "voluptuous"
+        "qcelemental~=0.20.0"
     ],
     "extras_require": {
         "testing": [
@@ -44,7 +42,6 @@
             "pytest-cov"
         ],
         "pre-commit": [
-            "astroid<2.5",
             "pre-commit~=2.2",
             "pylint~=2.8.0"
         ],
